@@ -1,22 +1,22 @@
 import pickle
 
-def pack(obj, fileName):
+def pack(obj, fileName): #Sérialise un objet, et le stocke sous le nom voulu "filename"
     f = open(fileName, 'wb')
     pickle.dump(obj, f)
     f.close()
 
-def unpack(fileName):
+def unpack(fileName):  #désérialise l'objet du nom "filename"
     f = open(fileName, 'rb')
     temp = pickle.load(f)
     f.close()
     return temp
 
 class Alphabet:
-    def __init__(self, lettres, epsilon):
+    def __init__(self, lettres, epsilon): #classe de l'objet alphabet
         self.lettres = lettres
         self.epsilon = epsilon
 
-class Ruban:
+class Ruban:   #classe de l'objet ruban
     def __init__(self, values, alphabet):
         self.values = values
         self.minIndex = 0
@@ -24,7 +24,7 @@ class Ruban:
         self.zeroIndex = 0
         self.alphabet = alphabet
 
-    def __getitem__(self, index):
+    def __getitem__(self, index): #ruban a l'infini des 2 cotés ( récupération de valeur)
         if index < self.minIndex:
             for k in range(self.minIndex - index):
                 self.values.insert(0, self.alphabet.epsilon)
@@ -39,7 +39,7 @@ class Ruban:
         else:
             return self.values[self.zeroIndex + index]
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, index, value):#lruban a l'infini des 2 cotés (définition de valeur)
         if index < self.minIndex:
             for k in range(self.minIndex - index):
                 self.values.insert(0, self.alphabet.epsilon)
@@ -54,14 +54,14 @@ class Ruban:
     def __repr__(self):
         return self.values.__repr__()
         
-class Machine:    
+class Machine:    #classe de l'objet machine
     def __init__(self, ruban, transitions):
         self.ruban = ruban
         self.transitions = transitions
         self.currentState = 0
         self.index = 0
 
-    def oneStep(self):
+    def oneStep(self): #faire une transition
         print("Current state : ( " + str(self.currentState) + " , " + str(self.ruban[self.index]) + " )")
         
         try:
@@ -82,7 +82,7 @@ class Machine:
 
         return True
 
-    def allSteps(self):
+    def allSteps(self): #effectue toutes le
         while self.oneStep():
             pass
         self.currentState = 0
