@@ -1,51 +1,73 @@
+import pickle
+
+def pack(obj, fileName):
+    f = open(fileName, 'wb')
+    pickle.dump(obj, f)
+    f.close()
+
+def unpack(fileName):
+    f = open(fileName, 'rb')
+    temp = pickle.load(f)
+    f.close()
+    return temp
+
+class Alphabet:
+    def __init__(self, lettres, epsilon):
+        self.lettres = lettres
+        self.epsilon = epsilon
+
 class Ruban:
-    def __init__(self, values):
+    def __init__(self, values, alphabet):
         self.values = values
         self.minIndex = 0
         self.maxIndex = len(values) - 1
         self.zeroIndex = 0
+        self.alphabet = alphabet
 
     def __getitem__(self, index):
         if index < self.minIndex:
             for k in range(self.minIndex - index):
-                self.values.insert(0, " ")
+                self.values.insert(0, self.alphabet.epsilon)
             self.zeroIndex += (self.minIndex - index)
             self.minIndex = index
-            return " "
+            return self.alphabet.epsilon
         elif index > self.maxIndex:
             for k in range(index - self.maxIndex):
-                self.values.append(" ")
+                self.values.append(self.alphabet.epsilon)
             self.maxIndex = index
-            return " " 
+            return self.alphabet.epsilon
         else:
             return self.values[self.zeroIndex + index]
 
     def __setitem__(self, index, value):
         if index < self.minIndex:
             for k in range(self.minIndex - index):
-                self.values.insert(0, " ")
+                self.values.insert(0, self.alphabet.epsilon)
             self.zeroIndex += (self.minIndex - index)
             self.minIndex = index
         elif index > self.maxIndex:
             for k in range(index - self.maxIndex):
-                self.values.append(" ")
+                self.values.append(self.alphabet.epsilon)
             self.maxIndex = index 
         self.values[self.zeroIndex + index] = value
+
+    def __repr__(self):
+        return self.values.__repr__()
         
 class Machine:    
-    def __init__(self, ruban, transitions, initState, initIndex):
+    def __init__(self, ruban, transitions):
         self.ruban = ruban
         self.transitions = transitions
-        self.currentState = initState
-        self.index = initIndex
+        self.currentState = 0
+        self.index = 0
 
     def oneStep(self):
-        print("Current state : ( " + str(currentState) + " , " + str(self.ruban[self.index]) + " )")
+        print("Current state : ( " + str(self.currentState) + " , " + str(self.ruban[self.index]) + " )")
         
         try:
             temp = self.transitions[(self.currentState, self.ruban[self.index])]
         except KeyError as ke:
-            print("Transition for current state undefined, stopping.")
+            print("Transition for " + str(self.ruban[self.index]) + " in state " + str(self.currentState) + " not defined, stopping.")
             return False
 
         nextState = temp[0]
@@ -61,5 +83,6 @@ class Machine:
         return True
 
     def allSteps(self):
-        while oneStep():
+        while self.oneStep():
             pass
+        self.currentState = 0
