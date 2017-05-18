@@ -1,0 +1,5 @@
+DATA
+BIT 8
+VAR A b15
+CODE
+ADD A b-5
