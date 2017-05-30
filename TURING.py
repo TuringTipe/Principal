@@ -1,33 +1,38 @@
 import pickle
-import tkinter
+from tkinter import *
 
 def pack(obj, fileName):
-    f = open(fileName, 'wb')
-    pickle.dump(obj, f)
-    f.close()
+	"""Fonction permettant de sérialiser obj dans le fichier fileName."""
+	f = open(fileName, 'wb')
+	pickle.dump(obj, f)
+	f.close()
 
 def unpack(fileName):
-    f = open(fileName, 'rb')
-    temp = pickle.load(f)
-    f.close()
-    return temp
+	"""Fonction permettant de désérialiser l'objet dans fileName."""
+	f = open(fileName, 'rb')
+	temp = pickle.load(f)
+	f.close()
+	return temp
 
 def complement(tab):
-    a = []
-    for i in tab:
-        a.append(1 - i)
-    return a
+	"""Fonction retournant le complément à 1 du nombre binaire représenté par tab."""
+	a = []
+	for i in tab:
+		a.append(1 - i)
+	return a
 
 def plussun(tab):
-    for k in range(len(tab)):
-        if tab[k] == 1:
-            tab[k] = 0
-        elif tab[k] == 0:
-            r = 0
-            tab[k] = 1
-            return
+	"""Fonction ajoutant 1 au nombre binaire représenté par tab (par effet de bord)."""
+	for k in range(len(tab)):
+		if tab[k] == 1:
+			tab[k] = 0
+		elif tab[k] == 0:
+			r = 0
+			tab[k] = 1
+			return
 
 def binToNint(tab, n = -1):
+	"""Conversion binaire -> Entier naturel sur n bits."""
 	nint = 0
 	if n == -1:
 		n = len(tab)
@@ -36,6 +41,7 @@ def binToNint(tab, n = -1):
 	return nint
 
 def binToZint(tab, n = -1):
+	"""Conversion binaire -> Entier relatif sur n bits."""
 	h = 1
 	if n == -1:
 		n = len(tab)
@@ -52,6 +58,7 @@ def binToZint(tab, n = -1):
 	return h * binToNint(t, n = n)
 
 def nintToBin(nint, n = -1): #Cas nint = 0, n = -1 retourne [] Foireux... mais normalement sans importance
+	"""Conversion entier naturel -> binaire sur n bits."""
 	a = []
 	while nint != 0:
 		a.append(nint % 2)
@@ -65,6 +72,7 @@ def nintToBin(nint, n = -1): #Cas nint = 0, n = -1 retourne [] Foireux... mais n
 	return a
 
 def zintToBin(zint, n = -1):
+	"""Conversion entier relatif -> binaire sur n bits."""
 	if n == -1:
 		n += 1 #pas ouf ca
 	if zint >= 0:
@@ -79,11 +87,13 @@ def zintToBin(zint, n = -1):
 	return r
 
 class Alphabet:
-    def __init__(self, lettres, epsilon):
-        self.lettres = lettres
-        self.epsilon = epsilon
+	"""On définit un alphabet comme un ensemble de lettres et un caractère blanc (epsilon)."""
+	def __init__(self, lettres, epsilon):
+		self.lettres = lettres
+		self.epsilon = epsilon
 
 class Ruban:
+	"""On dédfinit un ruban comme un tableau unidimensionnel infini."""
 	def __init__(self, values, alphabet):
 		self.values = values
 		self.minIndex = 0
@@ -92,15 +102,18 @@ class Ruban:
 		self.alphabet = alphabet
 
 	def getSpan(self, n, k):
+		"""Permet d'extraire la portion [n, n + k[ du ruban."""
 		a = []
 		for i in range(n, n + k):
 			a.append(self.__getitem__(i))
 		return a
         
 	def __len__(self):
+		"""Retourne la longueur actuelle du ruban (i.e. la longueur utilisée)."""
 		return len(self.values)
 
 	def __getitem__(self, index):
+		"""Retourne la valeur à l'index index du ruban. Si celle-ci n'a pas été définie, il s'agit de epsilon."""
 		if index < self.minIndex:
 			for k in range(self.minIndex - index):
 				self.values.insert(0, self.alphabet.epsilon)
@@ -116,6 +129,7 @@ class Ruban:
 			return self.values[self.zeroIndex + index]
 
 	def __setitem__(self, index, value):
+		"""Affecte la valeur value à l'index index du ruban."""
 		if type(value) == list:
 			for k in range(len(value)):
 				if index + k < self.minIndex:
@@ -123,7 +137,7 @@ class Ruban:
 						self.values.insert(0, self.alphabet.epsilon)
 					self.zeroIndex += (self.minIndex - (index + k))
 					self.minIndex = index + k
-				elif index + k > self.maxIndex: #TODO A Améliorer de beauuuuuucouuuuup. Jle ferai demain, promis
+				elif index + k > self.maxIndex: #TODO A Améliorer de beauuuuuucouuuuup. Jle ferai demain, promis APPEL RECURSIF !!!!! :D
 					for i in range((index + k) - self.maxIndex):
 						self.values.append(self.alphabet.epsilon)
 					self.maxIndex = index + k
@@ -141,42 +155,46 @@ class Ruban:
 			self.values[self.zeroIndex + index] = value
 
 	def __repr__(self):
+		"""Permet d'utiliser print(ruban)."""
 		return self.values.__repr__()
         
 class Machine:
-    def __init__(self, ruban, transitions):
-        self.ruban = ruban
-        self.transitions = transitions
-        self.currentState = "0"
-        self.index = 0
+	"""On définit une machine de Turing comme un ensemble de transitions et un ruban sur lequel la machine va agir."""
+	def __init__(self, ruban, transitions):
+		self.ruban = ruban
+		self.transitions = transitions
+		self.currentState = "0"
+		self.index = 0
 
-    def oneStep(self):
-        print("Current state : ( " + str(self.currentState) + " , " + str(self.ruban[self.index]) + " )" + "   " + str(self.index) )
+	def oneStep(self):
+		"""Effectue une transition et retourne True. Si la transition n'est pas définie, retourne False."""
+		print("Current state : ( " + str(self.currentState) + " , " + str(self.ruban[self.index]) + " )" + "   " + str(self.index) )
         
-        try:
-            temp = self.transitions[(self.currentState, self.ruban[self.index])]
-        except KeyError as ke:
-            print("Transition for " + str(self.ruban[self.index]) + " in state " + str(self.currentState) + " not defined, stopping.")
-            return False
+		try:
+			temp = self.transitions[(self.currentState, self.ruban[self.index])]
+		except KeyError as ke:
+			print("Transition for " + str(self.ruban[self.index]) + " in state " + str(self.currentState) + " not defined, stopping.")
+			return False
 
-        nextState = temp[0]
-        deplacement = temp[1]
-        ecriture = temp[2]
+		nextState = temp[0]
+		deplacement = temp[1]
+		ecriture = temp[2]
 
-        self.ruban[self.index] = ecriture
-        self.index += deplacement
-        self.currentState = nextState
-                
-        print("Transition : ( " + str(nextState) + " , " + str(deplacement) + " , " + str(ecriture) + " )")
+		self.ruban[self.index] = ecriture
+		self.index += deplacement
+		self.currentState = nextState
+		
+		print("Transition : ( " + str(nextState) + " , " + str(deplacement) + " , " + str(ecriture) + " )")
 
-        return True
+		return True
 
-    def allSteps(self):
-        while self.oneStep():
-            pass
+	def allSteps(self):
+		"""Effectue des transitions tant que celles-ci sont définies."""
+		while self.oneStep():
+			pass
 
 
-##################################################
+################################################## DEPRECATED
 def generate_move(x):
 	"""Génère un dictionnaire représentant la fonction de transition d'un déplacement
 	de x à gauche ou à droite."""
@@ -269,24 +287,12 @@ def generate_opposite(n):
 		d[("P" + K, 0)] = ("F", -k + 1, 1)
 		d[("P" + K, 1)] = ("P" + str(k + 1), 1, 0)
 	return d
-##################################################
-
-
-class TuringWindow:
-
-	def __init__(self, machine):
-		self.machine = machine
-		self.root = tkinter.Tk()
-		self.root.minsize(width = 500, height = 500)
-		self.root.maxsize(width = 500, height = 500)
-		self.root.title("TIPE - Machine de Turing")
-		#TODO
-		#WIP En vrai je sais meme pas comment presenter la fenetre.... En discuter avec des designers ? Cest chiant les ihm
+####################################################
 
 ####################################################
 
 class Generator:
-
+	"""Un générateur permet de créer une machine de Turing à partir de pseudo-code stocké dans un fichier."""
 	def __init__(self):
 		self.V = []
 		self.Vi = {}
@@ -296,27 +302,34 @@ class Generator:
 		self.ietat = "0"
 		self.fetat = "1"
 		self.currentIndex = 0
-		self.ruban = None
 		self.stack = []
 
-	def generate(self, fileName, alphabet): ##TODO : Cleanup
-		"""Genere une machine prete a partir."""
+	def generate(self, fileName, alphabet):
+		"""Génère une machine de Turing à partir d'un fichier."""
 		f = open(fileName, "r")
 		lines = f.readlines()
 		f.close()
-		self.ruban = Ruban([alphabet.epsilon], alphabet)
+		ruban = Ruban([alphabet.epsilon], alphabet)
 		for a in range(len(lines)):
 			lines[a] = lines[a].replace("\n","")
-		for line in lines: #TODO : Verifier la syntaxe + exceptions
+		for line in lines: 
 			self.faidestrucs(line.split(" "))
-		return Machine(self.ruban, self.tr)
+		self.V = []
+		self.Vi = {}
+		self.n = 0
+		self.tr = {}
+		self.constante = "0"
+		self.ietat = "0"
+		self.fetat = "1"
+		self.currentIndex = 0
+		self.stack = []
+		return Machine(ruban, self.tr)
 
 	def faidestrucs(self, args):
-		"""ATTTENTION FONCTION DIGOULASSE.
-		Pirate, Ye be warned..."""
+		"""Créée les transitions associées à une ligne."""
 		a = args[0]
 		if a == "DATA":
-			pass #C'est juste là pour faire joli, en fait
+			pass
 		elif a == "BIT":
 			self.n = int(args[1])
 		elif a == "VAR" :
@@ -325,10 +338,10 @@ class Generator:
 			c = 0
 			for var in self.V:
 				try:
-					temp = [int(var[1][k]) for k in range(len(var[1]))]	#Check longueur TODO		
+					temp = [int(var[1][k]) for k in range(len(var[1]))]
 				except ValueError:
 					temp = zintToBin(int(var[1][1:]), n = self.n)
-				self._generate_write(temp) #Choix intéressant
+				self._generate_write(temp)
 				self._generate_move(self.n)
 				self.Vi[var[0]] = c
 				c += self.n
@@ -381,17 +394,43 @@ class Generator:
 				self._generate_move(-self.n)	
 			self._generate_mult()
 		elif a == "COPY":
-			self._generate_copy(self.n, int(args[1])) #TODO Avec get
+			self._generate_copy(self.n, int(args[1]))
 		elif a == "OPP":
 			if len(args) == 2:
 				self._get(args[1])
 			self._generate_opposite(self.n)
 		elif a == "MV":
-			self._generate_move(int(args[1])) #TODO Avec get
+			self._generate_move(int(args[1]))
 		elif a == "GET":
 			self._get(args[1])
 		elif a == "SET":
 			self._generate_copy(self.n, self.Vi[args[1]] - self.currentIndex)
+		elif a == "NOT":
+			if len(args) == 2:
+				self._get(args[1])
+			self._generate_not(self.n)
+		elif a == "AND":
+			if len(args) == 3:
+				self._get(args[1])
+				self._generate_move(self.n)
+				self._get(args[2])
+				self._generate_move(-self.n)
+			elif len(args) == 2:
+				self._generate_move(self.n)
+				self._get(args[1])
+				self._generate_move(-self.n)
+			self._generate_and(self.n)
+		elif a == "OR":
+			if len(args) == 3:
+				self._get(args[1])
+				self._generate_move(self.n)
+				self._get(args[2])
+				self._generate_move(-self.n)
+			elif len(args) == 2:
+				self._generate_move(self.n)
+				self._get(args[1])
+				self._generate_move(-self.n)
+			self._generate_or(self.n)
 		elif a == "GT":
 			if len(args) == 3:
 				self._get(args[1])
@@ -403,6 +442,30 @@ class Generator:
 				self._get(args[1])
 				self._generate_move(-self.n)
 			self._generate_greater_than(self.n)
+		elif a == "GE":
+			b = args[1:]
+			b.insert(0, "GT")
+			self.faidestrucs(b)
+			self._generate_move(self.n)
+			b[0] = "EQU"
+			self.faidestrucs(b)
+			self.generate_copy(self.n, -2 * self.n)	
+			self._generate_or(self.n)
+		elif a == "LE":
+			b = args[1:]
+			b.insert(0,"GT")
+			self.faidestrucs(b)
+			self._generate_not(self.n)
+		elif a == "LT":
+			b = args[1:]
+			b.insert(0,"NEQU")
+			self.faidestrucs(b)
+			self._generate_not(self.n)
+			self._generate_move(self.n)
+			b[0] = "LE"
+			self.faidestrucs(b)
+			self._generate_copy(self.n, -2 * self.n)
+			self._generate_and(self.n)			
 		elif a == "EQU":
 			if len(args) == 3:
 				self._get(args[1])
@@ -414,38 +477,43 @@ class Generator:
 				self._get(args[1])
 				self._generate_move(-self.n)
 			self._generate_equal(self.n)
-						
+		elif a == "NEQU":
+			b = args[1:]
+			b.insert(0,"EQU")
+			self.faidestrucs(b)
+			self._generate_not(self.n)
 	
 	def getConstante(self):
+		"""Permet de fournir des constantes uniques pour garantir l'unicité des états."""
 		t = self.constante
 		self.constante = str(int(self.constante) + 1)
 		return t
 
 	def getStates(self):
+		"""Fournit les états de début et de fin, puis les change de manière à 'enchainer' les transitions."""
 		t = (self.ietat, self.fetat)
 		self.ietat = self.fetat
 		self.fetat = str(int(self.fetat) + 1)
 		return t
 
-	
 	def _get(self, a):
+		"""Permet d'écrire la valeur d'une variable ou d'un nombre binaire ou décimal."""
 		try:
 			b = int(a)
-			temp = [int(a[k]) for k in range(len(a))] ##TODO Check la taille. Encore.
+			temp = [int(a[k]) for k in range(len(a))]
 			self._generate_write(temp)
 		except ValueError:
-			if a.startswith('b'):##En supposant que a soit de la bonne taille TODO
+			if a.startswith('b'):
 				temp = zintToBin(int(a[1:]), self.n)
 				self._generate_write(temp)
-			else: #C'est une variable
+			else:
 				index = self.currentIndex
 				self._generate_move(self.Vi[a] - index)
 				self._generate_copy(self.n, index - self.Vi[a])
 				self._generate_move(index - self.Vi[a])
 
 	def _generate_move(self, x):
-		"""Génère un dictionnaire représentant la fonction de transition d'un déplacement
-		de x à gauche ou à droite."""
+		"""Déplacement de x (relatif)."""
 		d = self.tr
 		startState, finalState = self.getStates()
 		d[(startState, 0)] = (finalState, x, 0)
@@ -453,6 +521,7 @@ class Generator:
 		self.currentIndex += x
 
 	def _generate_write(self, x):
+		"""Ecriture du nombre binaire x."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -466,8 +535,7 @@ class Generator:
 			d[(C + "E" + K, 1)] = (C + "E" + str(k + 1), 1, x[k])
 	
 	def _generate_copy(self, n, x):
-		"""Génère un dictionnaire représentant la fonction de transition d'une copie
-		de n bits vers l'emplacement x (relatif)."""
+		"""Copie n bits vers l'emplacement x (relatif)."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -485,17 +553,12 @@ class Generator:
 			d[(C + "E1" + K, 1)] = (C + "L" + str(k + 1), -1 * (x - 1), 1)	
 
 	def _generate_add(self, n):
-		"""Génère un dictionnaire représentant la fonction de transition
-		d'un aditionneur n bits."""
+		"""Addition sur n bits pour les entiers relatifs."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
 		d[(startState, 1)] = (C + "E1P1", n, 1)
 		d[(startState, 0)] = (C + "E1P0", n, 0)
-		#d[(C + "E0P0", 1)] = (C + "E1P", 1 - n, 1) Ces lignes sont louches et foutent le bronx ......?
-		#d[(C + "E0P0", 0)] = (C + "E1P", 1 - n, 0)
-		#d[(C + "E0P1", 1)] = (C + "E1R", 1 - n, 0)
-		#d[(C + "E0P1", 0)] = (C + "E1P", 1 - n, 1)
 		for k in range(1, n + 1):
 			K = str(k)
 			L = str(k + 1)
@@ -516,8 +579,7 @@ class Generator:
 		self.currentIndex += n
 
 	def _generate_mult(self):
-		"""Génère un dictionnaire représentant la fonction de transition
-		d'un multiplicateur 8 bits dans Z."""
+		"""Multiplication sur 8 bits dans Z."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -542,8 +604,7 @@ class Generator:
 		self.currentIndex += 16 # 2*n 
 
 	def _generate_opposite(self, n):
-		"""Genere une dictionnaire representant la fonction de transition
-		permettant de determiner l'oppose d'un entier relatif."""
+		"""Donne l'opposé d'un entier relatif."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -564,8 +625,71 @@ class Generator:
 			d[(C + "P" + K, 0)] = (finalState, -k + 1, 1)
 			d[(C + "P" + K, 1)] = (C + "P" + str(k + 1), 1, 0)
 		self.currentIndex += n
-			
+	
+	def _generate_not(self, n):
+		"""Opérateur NOT."""
+		d = self.tr
+		C = self.getConstante()
+		startState, finalState = self.getStates()
+		d[(startState, 0)] = (C + "L0", 0, 0)
+		d[(startState, 1)] = (C + "L0", 0, 1)
+		d[(C + "L" + str(n), 0)] = (finalState, 0, 0)
+		d[(C + "L" + str(n), 1)] = (finalState, 0, 1)
+		for k in range(n):
+			K = str(k)
+			d[(C + "L" + K, 0)] = (C + "E0" + K, n, 0)
+			d[(C + "L" + K, 1)] = (C + "E1" + K, n, 1)
+			d[(C + "E0" + K, 0)] = (C + "L" + str(k + 1), -n + 1, 1)
+			d[(C + "E0" + K, 1)] = (C + "L" + str(k + 1), -n + 1, 1)
+			d[(C + "E1" + K, 0)] = (C + "L" + str(k + 1), -n + 1, 0)
+			d[(C + "E1" + K, 1)] = (C + "L" + str(k + 1), -n + 1, 0)
+		self.currentIndex += n
+
+	def _generate_and(self, n):
+		"""Opérateur AND."""
+		d = self.tr
+		C = self.getConstante()
+		startState, finalState = self.getStates()
+		d[(startState, 0)] = (C + "0L", 0, 0)
+		d[(startState, 0)] = (C + "0L", 0, 1)
+		d[(C + str(n) + "L", 0)] = (finalState, n, 0)
+		d[(C + str(n) + "L", 1)] = (finalState, n, 1)
+		for k in range(n):
+			K = str(k)
+			d[(C + K + "L", 0)] = (C + K + "NE", 2 * n, 0)
+			d[(C + K + "L", 1)] = (C + K + "L1", n, 1)
+			d[(C + K + "L1", 0)] = (C + K + "NE", n, 0)
+			d[(C + K + "L1", 1)] = (C + K + "E", n, 1)
+			d[(C + K + "E", 0)] = (C + str(k + 1) + "L", -2 * n + 1, 1)
+			d[(C + K + "E", 1)] = (C + str(k + 1) + "L", -2 * n + 1, 1)
+			d[(C + K + "NE", 0)] = (C + str(k + 1) + "L", -2 * n + 1, 0)
+			d[(C + K + "NE", 1)] = (C + str(k + 1) + "L", -2 * n + 1, 0)
+		self.currentIndex += 2 * n
+
+	def _generate_or(self, n):
+		"""Opérateur OR."""
+		d = self.tr
+		C = self.getConstante()
+		startState, finalState = self.getState() #
+		d[(startState, 0)] = (C + "0L", 0, 0)
+		d[(startState, 0)] = (C + "0L", 0, 1)
+		d[(C + str(n) + "L", 0)] = (finalState, n, 0)
+		d[(C + str(n) + "L", 1)] = (finalState, n, 1)
+		for k in range(n):
+			K = str(k)
+			d[(C + K + "L", 0)] = (C + K + "L0", n, 0)
+			d[(C + K + "L", 1)] = (C + K + "E", 2 * n, 1)
+			d[(C + K + "L0", 0)] = (C + K + "NE", n, 0)
+			d[(C + K + "L0", 1)] = (C + K + "E", n, 1)
+			d[(C + K + "E", 0)] = (C + str(k + 1) + "L", -2 * n + 1, 1)
+			d[(C + K + "E", 1)] = (C + str(k + 1) + "L", -2 * n + 1, 1)
+			d[(C + K + "NE", 0)] = (C + str(k + 1) + "L", -2 * n + 1, 0)
+			d[(C + K + "NE", 1)] = (C + str(k + 1) + "L", -2 * n + 1, 0)
+		self.currentIndex += 2 * n
+		
+
 	def _generate_greater_than(self, n):
+		"""Relation d'ordre sur Z : >"""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -594,6 +718,7 @@ class Generator:
 		self.currentIndex += (2 * n)
 
 	def _generate_equal(self, n):
+		"""Test d'égalité."""
 		d = self.tr
 		C = self.getConstante()
 		startState, finalState = self.getStates()
@@ -616,12 +741,14 @@ class Generator:
 		self.currentIndex += (2 * n)
 
 	def _generate_if(self):
+		"""Test conditionnel IF."""
 		d = self.tr
 		startState, finalState = self.getStates()		
 		d[(startState, 1)] = (finalState, 0, 1)
 		self.stack.append(startState)
 
 	def _generate_else(self):
+		"""Clause ELSE."""
 		d = self.tr
 		startState, finalState = self.getStates()
 		a = self.stack.pop()
@@ -629,6 +756,7 @@ class Generator:
 		self.stack.append(startState)
 
 	def _generate_endif(self):
+		"""Fin du bloc IF."""
 		d = self.tr
 		startState, finalState = self.getStates()
 		a = self.stack.pop()
@@ -638,6 +766,7 @@ class Generator:
 		d[(startState, 1)] = (finalState, 0, 1)
 
 	def _generate_while(self, assertion):
+		"""Boucle conditionnelle WHILE."""
 		d = self.tr
 		i = self.currentIndex
 		s, f = self.getStates()
@@ -650,6 +779,7 @@ class Generator:
 		self.stack.append((s,startState, i))	
 
 	def _generate_endwhile(self):
+		"""Fin du bloc WHILE."""
 		d = self.tr
 		s, ss, i = self.stack.pop()
 		startState, finalState = self.getStates()
@@ -658,7 +788,7 @@ class Generator:
 		d[(startState, 1)] = (s, i - self.currentIndex, 1)
 		self.currentIndex += (i - self.currentIndex)
 
-def test(f):
+def test(f): #Fonction de test pour le fichier f
 	g = Generator()
 	m = g.generate(f,unpack("binaire.pickle"))
 	m.allSteps()
